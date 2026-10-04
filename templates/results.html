@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Candidate Rankings - {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="results-header card">
+        <div class="header-main">
+            <div>
+                <span class="badge badge-primary">Ranked Results</span>
+                <h2>Candidate Rankings</h2>
+                <p class="subtitle">Job Role: <strong>{{ job.title }}</strong> ({{ rankings|length }} candidates evaluated)</p>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('upload_resumes', job_id=job.id) }}" class="btn btn-secondary btn-sm">
+                    + Upload More Resumes
+                </a>
+            </div>
+        </div>
+
+        {% if job.required_skills %}
+            <div class="job-skills-banner">
+                <strong>Required Target Skills:</strong>
+                <div class="tags-container">
+                    {% for skill in job.required_skills.split(',') %}
+                        <span class="tag tag-target">{{ skill.strip() }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if rankings %}
+        <div class="card rankings-table-card">
+            <div class="table-responsive">
+                <table class="table rankings-table">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Rank</th>
+                            <th>Candidate Name</th>
+                            <th class="text-center">Overall Score</th>
+                            <th>Score Breakdown</th>
+                            <th>Matched Skills</th>
+                            <th>Missing Skills</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in rankings %}
+                            <tr class="ranking-row {% if loop.first %}top-rank{% endif %}">
+                                <td class="text-center rank-cell">
+                                    <span class="rank-badge rank-{{ loop.index }}">#{{ loop.index }}</span>
+                                </td>
+                                <td class="candidate-cell">
+                                    <div class="candidate-name">{{ item.name }}</div>
+                                    <div class="candidate-meta">{{ item.email }} • {{ item.phone }}</div>
+                                </td>
+                                <td class="text-center score-cell">
+                                    <div class="score-circle {% if item.final_score >= 80 %}score-high{% elif item.final_score >= 60 %}score-med{% else %}score-low{% endif %}">
+                                        {{ "%.1f"|format(item.final_score) }}
+                                    </div>
+                                </td>
+                                <td class="breakdown-cell">
+                                    <div class="mini-bar-group">
+                                        <div class="mini-bar-label">Semantic Sim: <strong>{{ "%.1f"|format(item.semantic_score) }}%</strong></div>
+                                        <div class="progress-bar-bg"><div class="progress-bar-fill fill-semantic" style="width: {{ item.semantic_score }}%"></div></div>
+                                    </div>
+                                    <div class="mini-bar-group">
+                                        <div class="mini-bar-label">Skill Match: <strong>{{ "%.1f"|format(item.skill_score) }}%</strong></div>
+                                        <div class="progress-bar-bg"><div class="progress-bar-fill fill-skill" style="width: {{ item.skill_score }}%"></div></div>
+                                    </div>
+                                </td>
+                                <td class="skills-cell">
+                                    {% if item.matched_skills %}
+                                        <div class="tags-container">
+                                            {% for skill in item.matched_skills.split(',')[:4] %}
+                                                <span class="tag tag-matched">✓ {{ skill.strip() }}</span>
+                                            {% endfor %}
+                                            {% if item.matched_skills.split(',')|length > 4 %}
+                                                <span class="tag tag-more">+{{ item.matched_skills.split(',')|length - 4 }} more</span>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">None</span>
+                                    {% endif %}
+                                </td>
+                                <td class="skills-cell">
+                                    {% if item.missing_skills %}
+                                        <div class="tags-container">
+                                            {% for skill in item.missing_skills.split(',')[:3] %}
+                                                <span class="tag tag-missing">✗ {{ skill.strip() }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <span class="tag tag-all-matched">All Skills Matched!</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center action-cell">
+                                    <a href="{{ url_for('candidate_detail', job_id=job.id, candidate_id=item.candidate_id) }}" class="btn btn-outline btn-sm">
+                                        View Analysis
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-state card">
+            <h3>No Candidates Evaluated Yet</h3>
+            <p>Upload candidate PDF or DOCX resumes to generate semantic embeddings and calculate scores.</p>
+            <a href="{{ url_for('upload_resumes', job_id=job.id) }}" class="btn btn-primary">Upload Resumes</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

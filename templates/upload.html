@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Resumes - {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="card upload-card">
+        <div class="card-header">
+            <div class="badge badge-info">Job #{{ job.id }}</div>
+            <h2>Upload Candidate Resumes</h2>
+            <p class="subtitle">Target Job: <strong>{{ job.title }}</strong></p>
+        </div>
+
+        <form action="{{ url_for('upload_resumes', job_id=job.id) }}" method="POST" enctype="multipart/form-data" class="upload-form" id="uploadForm">
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-zone-icon">📄</div>
+                <h3 class="drop-zone-title">Drag & Drop Resume Files Here</h3>
+                <p class="drop-zone-text">Supports PDF (.pdf) and Word (.docx) formats up to 16MB per file.</p>
+                <label for="resumes" class="btn btn-secondary btn-sm drop-zone-btn">Select Files</label>
+                <input type="file" id="resumes" name="resumes" multiple accept=".pdf,.docx" class="file-input" required>
+            </div>
+
+            <div class="file-list-preview" id="fileListPreview"></div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Back to Dashboard</a>
+                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                    ⚡ Process & Rank Resumes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Create Job - AI Resume Sorter{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="card form-card">
+        <div class="card-header">
+            <h2>Create New Job Description</h2>
+            <p>Enter job title and detailed requirements. The system will extract skills and compute semantic embeddings for resume matching.</p>
+        </div>
+        <form action="{{ url_for('create_job') }}" method="POST" class="job-form">
+            <div class="form-group">
+                <label for="title">Job Title <span class="required">*</span></label>
+                <input type="text" id="title" name="title" class="form-control" placeholder="e.g. Senior Python Developer / Data Scientist" required>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Job Description & Qualifications <span class="required">*</span></label>
+                <textarea id="description" name="description" class="form-control" rows="8" placeholder="Paste the full job description here, including responsibilities, required technical skills (Python, SQL, Machine Learning, AWS, etc.), education, and experience..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="required_skills">Custom Required Skills (Optional, comma-separated)</label>
+                <input type="text" id="required_skills" name="required_skills" class="form-control" placeholder="e.g. Python, SQL, Flask, Machine Learning, Docker (Leave blank to auto-detect from description)">
+                <small class="form-hint">If left blank, skills will be automatically extracted from the job description text using our skill taxonomy.</small>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save & Upload Resumes →</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

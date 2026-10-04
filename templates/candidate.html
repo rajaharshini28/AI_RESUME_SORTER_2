@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}{{ candidate.name }} - Detailed Evaluation{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="detail-top-nav">
+        <a href="{{ url_for('rankings', job_id=job.id) }}" class="back-link">← Back to Candidate Rankings</a>
+    </div>
+
+    <!-- Candidate Profile Card -->
+    <div class="card candidate-detail-header">
+        <div class="profile-main">
+            <div class="profile-avatar">
+                {{ candidate.name[:2].upper() }}
+            </div>
+            <div class="profile-info">
+                <h1 class="candidate-detail-name">{{ candidate.name }}</h1>
+                <div class="meta-row">
+                    <span class="meta-item">📧 {{ candidate.email }}</span>
+                    <span class="meta-item">📞 {{ candidate.phone }}</span>
+                    <span class="meta-item">🎓 {{ candidate.education }}</span>
+                    <span class="meta-item">💼 {{ candidate.experience_years }} Yrs Experience</span>
+                </div>
+            </div>
+        </div>
+        <div class="profile-score-box">
+            <div class="score-label">Overall Match Score</div>
+            <div class="score-number">{{ "%.1f"|format(candidate.final_score) }}<span class="score-max">/100</span></div>
+            <div class="job-target-tag">Target: {{ candidate.job_title }}</div>
+        </div>
+    </div>
+
+    <!-- Explanation Reason Box -->
+    <div class="card reason-card">
+        <h3>💡 AI Evaluation & Matching Summary</h3>
+        <p class="reason-text">"{{ candidate.reason }}"</p>
+    </div>
+
+    <!-- Detailed Scores Grid -->
+    <div class="scores-grid">
+        <div class="card score-card">
+            <div class="score-card-header">
+                <h4>Semantic Similarity</h4>
+                <span class="weight-badge">Weight: 60%</span>
+            </div>
+            <div class="score-value">{{ "%.1f"|format(candidate.semantic_score) }}%</div>
+            <p class="score-desc">Vector-space similarity calculated using Sentence Transformers (`all-MiniLM-L6-v2`) cosine angle.</p>
+        </div>
+
+        <div class="card score-card">
+            <div class="score-card-header">
+                <h4>Skill Overlap</h4>
+                <span class="weight-badge">Weight: 25%</span>
+            </div>
+            <div class="score-value">{{ "%.1f"|format(candidate.skill_score) }}%</div>
+            <p class="score-desc">Explicit regex word-boundary skill comparison against required job skills taxonomy.</p>
+        </div>
+
+        <div class="card score-card">
+            <div class="score-card-header">
+                <h4>Experience Match</h4>
+                <span class="weight-badge">Weight: 10%</span>
+            </div>
+            <div class="score-value">{{ "%.1f"|format(candidate.experience_score) }}%</div>
+            <p class="score-desc">Extracted career duration evaluated against target years of experience.</p>
+        </div>
+
+        <div class="card score-card">
+            <div class="score-card-header">
+                <h4>Education Level</h4>
+                <span class="weight-badge">Weight: 5%</span>
+            </div>
+            <div class="score-value">{{ "%.1f"|format(candidate.education_score) }}%</div>
+            <p class="score-desc">Degree qualification level check (Doctorate, Master's, Bachelor's).</p>
+        </div>
+    </div>
+
+    <!-- Skills Breakdown Section -->
+    <div class="grid-2col">
+        <div class="card skills-detail-card">
+            <h3>✓ Matched Technical Skills</h3>
+            {% if candidate.matched_skills %}
+                <div class="tags-container">
+                    {% for skill in candidate.matched_skills.split(',') %}
+                        <span class="tag tag-matched-lg">✓ {{ skill.strip() }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No explicit required skills matched.</p>
+            {% endif %}
+        </div>
+
+        <div class="card skills-detail-card">
+            <h3>⚠️ Missing Target Skills</h3>
+            {% if candidate.missing_skills %}
+                <div class="tags-container">
+                    {% for skill in candidate.missing_skills.split(',') %}
+                        <span class="tag tag-missing-lg">✗ {{ skill.strip() }}</span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="tag tag-all-matched">All required job skills are present on candidate's resume!</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Extracted Resume Text Accordion -->
+    <div class="card resume-text-card">
+        <div class="resume-card-header">
+            <h3>📄 Extracted Resume Plain Text</h3>
+            <span class="filename-badge">File: {{ candidate.resume_filename }}</span>
+        </div>
+        <pre class="resume-text-view">{{ candidate.resume_text }}</pre>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI Resume Sorter{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-badge">✨ AI-Powered Candidate Ranking</div>
+    <h1 class="hero-title">Match & Rank Resumes with <span class="gradient-text">Semantic AI</span></h1>
+    <p class="hero-subtitle">
+        Upload PDF/DOCX resumes and let local Sentence Transformers (`all-MiniLM-L6-v2`) & explainable scoring rank candidates objectively against job descriptions.
+    </p>
+    <div class="hero-actions">
+        <a href="{{ url_for('create_job') }}" class="btn btn-primary btn-lg">
+            <span>+ Create New Job Description</span>
+        </a>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="section-header">
+        <h2>Active Job Postings</h2>
+        <p>Select a job to upload resumes or view candidate rankings.</p>
+    </div>
+
+    {% if jobs %}
+        <div class="jobs-list">
+            {% for job in jobs %}
+                <div class="card job-card">
+                    <div class="job-card-header">
+                        <h3 class="job-title">{{ job.title }}</h3>
+                        <span class="job-date">Posted {{ job.created_at[:10] }}</span>
+                    </div>
+                    <p class="job-description">{{ job.description[:180] }}...</p>
+                    
+                    {% if job.required_skills %}
+                        <div class="job-skills-preview">
+                            <strong>Required Skills:</strong>
+                            <div class="tags-container">
+                                {% for skill in job.required_skills.split(',')[:6] %}
+                                    <span class="tag tag-skill">{{ skill.strip() }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="job-card-footer">
+                        <a href="{{ url_for('upload_resumes', job_id=job.id) }}" class="btn btn-secondary btn-sm">
+                            📤 Upload Resumes
+                        </a>
+                        <a href="{{ url_for('rankings', job_id=job.id) }}" class="btn btn-primary btn-sm">
+                            📊 View Rankings
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state card">
+            <div class="empty-icon">📁</div>
+            <h3>No Job Descriptions Created Yet</h3>
+            <p>Get started by creating a job description to begin parsing and ranking candidate resumes.</p>
+            <a href="{{ url_for('create_job') }}" class="btn btn-primary">Create First Job</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
